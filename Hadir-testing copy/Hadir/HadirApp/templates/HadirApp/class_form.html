@@ -1,0 +1,214 @@
+{% extends 'HadirApp/base.html' %}
+{% block main_content %}
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="ar">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Class</title>
+    <link rel="stylesheet" href="{% static 'Hadir/log-reg-style.css' %}">
+    <link rel="stylesheet" href="{% static 'Hadir/main.css' %}">
+    <link rel="stylesheet" href="{% static 'Hadir/class.css' %}">
+    <link rel="stylesheet" href="{% static 'Hadir/attendance.css' %}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
+    <style>
+        body {
+            background: #ECF0F1 !important;
+            width: 100%;
+            height: 100%;
+        }
+        .container{
+            width: 70%;
+            height: 90%;
+            margin: 5% auto;
+            background-color: #ecf0f1;
+            border-radius: 20px;
+            padding: 2% 0 5% 0;
+        }
+        form label,input{
+            display: block;
+            margin-left: 5%;
+        }
+        .container h1{
+            color: #2175ba;
+        }
+        form input{
+            width: 50%;
+            height: 30px;
+            margin-top: 30px;
+            border-radius: 10px;
+        }
+        .Generate{
+            margin-left: 30%;
+        }
+        form label{
+            font-size: 20px;
+            font-weight: 550;
+        }
+        .square{
+            width: 40%;
+            height: 40%;
+            background-color: #FFF;
+            margin: 5% auto 0;
+            border-radius: 10px;
+            padding-top: 2%;
+            border: 3px dashed #000;
+        }
+        .qrImg{
+            margin:auto;
+            margin-bottom: 20px;
+            background-color: #FFF;
+        }
+        .Create{
+            margin: 3% auto;
+        }
+        #aa{
+            margin: 2% 30%;
+            font-size: 20px;
+            text-decoration: none;
+            color: #2175ba;
+            align-items: center;
+            width: 100%;
+            float: left;
+        }
+        @media(max-width:522px)
+        {
+            #aa{
+                margin: 2% 20%;
+            }
+        }
+        @media(max-width:382px)
+        {
+            #aa{
+                font-size: 16px;
+            }
+        }
+        @media(max-width:382px)
+        {
+            #aa{
+                font-size: 16px;
+            }
+        }
+    </style>
+    <!-- <link rel="stylesheet" href="../front/mainStyle.css"> -->
+</head>
+
+<body>
+
+    <div class="container">
+        <h1> Create new class</h1>
+        <div class="info-cont">
+
+            <form action="Create_class" method="POST">
+                {% csrf_token %}
+                <label for="">Section ID</label>
+                <input type="text" id="classID" name="classID" maxlength="3" required="required" placeholder="maximum three numbers">
+
+                {% if IDErr %}
+                <p style="color: brown;">{{ IDErr }}</p>
+                {% endif %}
+
+
+                {% if idErr %}
+                <p style="color: brown;">{{ idErr }}</p>
+                {% endif %}
+
+                <br>
+                <label for="">Course Name</label>
+                <input name="className" id="className" type="text" maxlength="20" required="required">
+
+                {% if nameErr %}
+                <p style="color: brown;">{{ nameErr }}</p>
+                {% endif %}
+
+                <br>
+                <label for="numOfStudents">Number of students</label>
+                <input type="number" name="numOfStudents" id="numOfStudents" min="10" max="100" required="required" placeholder="minimum 10 students">
+
+                <br>
+                <button class="Generate" type="button">Generate QR-Code</button>
+
+                    <div class="square" style="display: none;">       
+                        <div class="qr-img">
+                            <img style="display: none;" class="qrImg" src="" alt=" " width="80%" height="90%">
+                        </div>
+                    </div>
+                       
+                    <div class="line">
+                        <a id="aa" href="" target="_blank"></a>
+                    </div>
+
+                    <div>
+                        <button style="display: none;" class="Create" type="submit">Create Class</button>
+                     </div>
+
+                
+                <!-- <div>
+                    <img style="display: none;" class="qrImg" src="" alt=" " width="256" height="256">
+
+                    <a id="aa" href="" target="_blank"></a>
+                </div> -->
+
+                <!-- <button style="display: none;" class="Create" type="submit">Create Class</button> -->
+
+            </form>
+
+        </div>
+    </div>
+
+    <script>
+        const wrapper = document.querySelector(".container"),
+            classID = wrapper.querySelector("#classID"),
+            className = wrapper.querySelector("#className"),
+            classQR = wrapper.querySelector(".square")
+        createBtn = wrapper.querySelector('.Create'),
+            generateBtn = wrapper.querySelector(".Generate"),
+            qrImg = wrapper.querySelector('.qrImg'),
+            url = wrapper.querySelector('#aa');
+        let preValue;
+
+
+        generateBtn.addEventListener('click', () => {
+
+            if (!classID.value || !className.value) return;
+            qrImg.style.display = 'block'
+            createBtn.style.display = 'block';
+            classQR.style.display = 'block';
+            console.log(className);
+            let qrValue = (className.value + '-' + classID.value).trim();
+            console.log(qrValue);
+            if (!classID.value || preValue === qrValue) return;
+            preValue = qrValue;
+            generateBtn.innerText = "Generating QR Code...";
+            url.href = `http://localhost:8000/Hadir/student_enrollment/${qrValue}`;
+            qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${url.href}`;
+
+            qrImg.addEventListener('load', () => {
+                wrapper.classList.add("active");
+                generateBtn.innerText = 'Generating QR Code...'
+                url.text = "Generated Class Form";
+            });
+
+            url.addEventListener('load', () => {
+
+                wrapper.classList.add("active");
+            })
+        });
+
+        classID.addEventListener("keyup", () => {
+            if (!classID.value.trim()) {
+                wrapper.classList.remove("active");
+                preValue = "";
+            }
+        });
+
+    </script>
+</body>
+
+</html>
+
+{% endblock %}
